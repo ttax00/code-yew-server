@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList } from 'vscode';
+
 
 import {
 	LanguageClient,
@@ -12,6 +13,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
+import { isInsideHTMLRegion } from './embededHTML';
 
 let client: LanguageClient;
 
@@ -34,14 +36,42 @@ export function activate(context: ExtensionContext) {
 			options: debugOptions
 		}
 	};
+	const virtualDocumentContents = new Map<string, string>();
+
+	workspace.registerTextDocumentContentProvider('embedded-content', {
+		provideTextDocumentContent: uri => {
+			const originalUri = uri.path.slice(1).slice(0, -4);
+			const decodedUri = decodeURIComponent(originalUri);
+			return virtualDocumentContents.get(decodedUri);
+		}
+	});
+
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'plaintext' }],
-		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+		documentSelector: [{ scheme: 'file', language: 'rust' }],
+		middleware: {
+			provideCompletionItem: async (document, position, context, token, next) => {
+				// If not in `<style>`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, context, token);
+				}
+
+				const originalUri = document.uri.toString(true);
+				virtualDocumentContents.set(originalUri, "");
+
+				const vdocUriString = `embedded-content://xml/${encodeURIComponent(
+					originalUri
+				)}.xml`;
+				const vdocUri = Uri.parse(vdocUriString);
+				return await commands.executeCommand<CompletionList>(
+					'vscode.executeCompletionItemProvider',
+					vdocUri,
+					position,
+					context.triggerCharacter
+				);
+			}
 		}
 	};
 
