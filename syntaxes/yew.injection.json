@@ -1,0 +1,44 @@
+{
+	"scopeName": "source.rust.yew",
+	"injectionSelector": "L:source.rust",
+	"patterns": [
+		{
+			"include": "#html-macro"
+		},
+		{
+			"include": "#rust-brackets"
+		}
+	],
+	"repository": {
+		"html-macro": {
+			"name": "source.rust.yew.html",
+			"begin": "html! {",
+			"end": "}",
+			"beginCaptures": {
+				"0": {
+					"name": "punctuation.macro.open"
+				}
+			},
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.macro.close"
+				}
+			},
+			"patterns": [
+				{
+					"include": "source.js.jsx"
+				}
+			]
+		},
+		"rust-brackets": {
+			"name": "source.rust.yew",
+			"begin": "{",
+			"end": "}",
+			"patterns": [
+				{
+					"include": "source.rust"
+				}
+			]
+		}
+	}
+}

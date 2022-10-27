@@ -43,7 +43,37 @@
 					"description": "Traces the communication between VS Code and the language server."
 				}
 			}
-		}
+		},
+		"languages": [
+			{
+				"id": "rust",
+				"aliases": [
+					"Rust Yew",
+					"Rust"
+				],
+				"extensions": [
+					".rs"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"injectTo": [
+					"source.rust"
+				],
+				"scopeName": "source.rust.yew",
+				"path": "./syntaxes/yew.injection.json",
+				"embeddedLanguages": {
+					"source.rust.yew.html": "html",
+					"source.rust.yew": "rust"
+				},
+				"tokenTypes": {
+					"source.rust.yew.html": "other",
+					"source.rust.yew": "other"
+				}
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -63,6 +93,7 @@
 		"typescript": "^4.8.4"
 	},
 	"dependencies": {
-		"vscode-html-languageservice": "^5.0.2"
+		"vscode-html-languageservice": "^5.0.2",
+		"vscode-languageserver-textdocument": "^1.0.7"
 	}
 }
