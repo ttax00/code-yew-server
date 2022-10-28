@@ -20,6 +20,7 @@ import { getLanguageService } from 'vscode-html-languageservice';
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
+import { rename } from 'fs';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -42,15 +43,28 @@ connection.onInitialize((_params: InitializeParams) => {
 	};
 });
 
-connection.onCompletion(async (textDocumentPosition, token) => {
-	const document = documents.get(textDocumentPosition.textDocument.uri);
+connection.onCompletion(async (completionParam, token) => {
+	const document = documents.get(completionParam.textDocument.uri);
 	if (!document) {
 		return null;
 	}
 
 	return htmlLanguageService.doComplete(
 		document,
-		textDocumentPosition.position,
+		completionParam.position,
+		htmlLanguageService.parseHTMLDocument(document)
+	);
+});
+
+connection.onRenameRequest(async (renameParam, token) => {
+	const document = documents.get(renameParam.textDocument.uri);
+	if (!document) {
+		return null;
+	}
+	console.debug(renameParam);
+	return htmlLanguageService.doRename(document,
+		renameParam.position,
+		renameParam.newName,
 		htmlLanguageService.parseHTMLDocument(document)
 	);
 });

@@ -4,16 +4,18 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location } from 'vscode';
 
 
 import {
 	LanguageClient,
 	LanguageClientOptions,
+	RenameOptions,
+	RenameParams,
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { isInsideHTMLRegion } from './embededHTML';
+import { getHTMLVirtualContent, isInsideHTMLRegion } from './embededHTML';
 
 let client: LanguageClient;
 
@@ -53,14 +55,13 @@ export function activate(context: ExtensionContext) {
 		documentSelector: [{ scheme: 'file', language: 'rust' }],
 		middleware: {
 			provideCompletionItem: async (document, position, context, token, next) => {
-				console.log("Completion asked!");
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
 
 				const originalUri = document.uri.toString(true);
-				virtualDocumentContents.set(originalUri, "");
+				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
 
 				const vdocUriString = `embedded-content://html/${encodeURIComponent(
 					originalUri
@@ -72,7 +73,52 @@ export function activate(context: ExtensionContext) {
 					position,
 					context.triggerCharacter
 				);
-			}
+			},
+			provideRenameEdits: async (document, position, newName, token, next) => {
+				console.log("working");
+
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, newName, token);
+				}
+
+				const originalUri = document.uri.toString(true);
+				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
+
+				const vdocUriString = `embedded-content://html/${encodeURIComponent(
+					originalUri
+				)}.html`;
+
+				const vdocUri = Uri.parse(vdocUriString);
+				return await commands.executeCommand<WorkspaceEdit>(
+					'vscode.executeDocumentRenameProvider',
+					vdocUri,
+					position,
+					newName
+				);
+			},
+			provideReferences: async (document, position, options, token, next) => {
+				console.log("working");
+
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, options, token);
+				}
+
+				const originalUri = document.uri.toString(true);
+				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
+
+				const vdocUriString = `embedded-content://html/${encodeURIComponent(
+					originalUri
+				)}.html`;
+
+				const vdocUri = Uri.parse(vdocUriString);
+				return await commands.executeCommand<Location[]>(
+					'vscode.executeReferenceProvider',
+					vdocUri,
+					position
+				);
+			},
 		}
 	};
 
