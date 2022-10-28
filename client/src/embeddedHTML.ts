@@ -38,6 +38,9 @@ export function getHTMLVirtualContent(documentText: string) {
 		}
 	});
 
+	content = content.replace(/<>/g, '  ');
+	content = content.replace(/<\/>/g, '   ');
+
 	console.debug(content);
 	console.debug(regions);
 	return content;
@@ -77,14 +80,12 @@ export function getRegions(documentText: string) {
 						start: start,
 						end: i,
 					});
-					console.log(`[1] layer: ${layer}, start: ${start}, end: ${i - 1}`);
 				} else if (layer < 0) {
 					regions.push({
 						languageId: 'html',
 						start: start,
 						end: i,
 					});
-					console.log(`[2] layer: ${layer}, start: ${start}, end: ${i - 1}`);
 					break;
 				} else {
 					start = i + 1;
