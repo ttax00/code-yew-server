@@ -49,11 +49,12 @@ export function activate(context: ExtensionContext) {
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
-		// Register the server for plain text documents
+		// Register the server for rust documents
 		documentSelector: [{ scheme: 'file', language: 'rust' }],
 		middleware: {
 			provideCompletionItem: async (document, position, context, token, next) => {
-				// If not in `<style>`, do not perform request forwarding
+				console.log("Completion asked!");
+				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
@@ -61,9 +62,9 @@ export function activate(context: ExtensionContext) {
 				const originalUri = document.uri.toString(true);
 				virtualDocumentContents.set(originalUri, "");
 
-				const vdocUriString = `embedded-content://xml/${encodeURIComponent(
+				const vdocUriString = `embedded-content://html/${encodeURIComponent(
 					originalUri
-				)}.xml`;
+				)}.html`;
 				const vdocUri = Uri.parse(vdocUriString);
 				return await commands.executeCommand<CompletionList>(
 					'vscode.executeCompletionItemProvider',
@@ -83,6 +84,7 @@ export function activate(context: ExtensionContext) {
 		clientOptions
 	);
 
+	console.debug("server & client started");
 	// Start the client. This will also launch the server
 	client.start();
 }

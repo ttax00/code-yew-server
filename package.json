@@ -17,33 +17,10 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:plaintext"
+		"onLanguage:rust"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "Example configuration",
-			"properties": {
-				"languageServerExample.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"languageServerExample.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				}
-			}
-		},
 		"languages": [
 			{
 				"id": "rust",
@@ -65,7 +42,7 @@
 				"scopeName": "source.rust.yew",
 				"path": "./syntaxes/yew.injection.json",
 				"embeddedLanguages": {
-					"source.rust.yew.html": "html",
+					"source.rust.yew.html": "javascriptreact",
 					"source.rust.yew": "rust"
 				},
 				"tokenTypes": {
