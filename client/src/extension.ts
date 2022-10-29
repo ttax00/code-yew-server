@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location, DocumentFormattingEditProvider, ProviderResult, CustomDocumentEditEvent } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location, DocumentFormattingEditProvider, ProviderResult, CustomDocumentEditEvent, TextDocument } from 'vscode';
 import { TextEdit } from 'vscode-html-languageservice';
 
 
@@ -42,38 +42,41 @@ export function activate(context: ExtensionContext) {
 
 	workspace.registerTextDocumentContentProvider('embedded-content', {
 		provideTextDocumentContent: uri => {
-			const originalUri = uri.path.slice(1).slice(0, -4);
+			const originalUri = uri.path.slice(1).slice(0, -5);
 			const decodedUri = decodeURIComponent(originalUri);
 			return virtualDocumentContents.get(decodedUri);
 		}
 	});
 
+	function vdocUri(document: TextDocument) {
+		const originalUri = document.uri.toString(true);
+		virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
+
+		const vdocUriString = `embedded-content://html/${encodeURIComponent(
+			originalUri
+		)}.html`;
+
+		return Uri.parse(vdocUriString);
+	}
+
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for rust documents
-		documentSelector: [{ scheme: 'file', language: 'rustyew' }],
+		documentSelector: [{ scheme: 'file', language: 'rust' }],
 		middleware: {
 			provideCompletionItem: async (document, position, context, token, next) => {
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
-				console.log("doing complete!");
-
-				const originalUri = document.uri.toString(true);
-				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
-
-				const vdocUriString = `embedded-content://html/${encodeURIComponent(
-					originalUri
-				)}.html`;
-				const vdocUri = Uri.parse(vdocUriString);
-				return await commands.executeCommand<CompletionList>(
+				const result = await commands.executeCommand<CompletionList>(
 					'vscode.executeCompletionItemProvider',
-					vdocUri,
+					vdocUri(document),
 					position,
 					context.triggerCharacter
 				);
+				return result;
 			},
 			provideRenameEdits: async (document, position, newName, token, next) => {
 				// If not in `html! {}`, do not perform request forwarding
@@ -82,37 +85,66 @@ export function activate(context: ExtensionContext) {
 				}
 				console.log("doing rename!");
 
-				const originalUri = document.uri.toString(true);
-				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
-
-				const vdocUriString = `embedded-content://html/${encodeURIComponent(
-					originalUri
-				)}.html`;
-
-				const vdocUri = Uri.parse(vdocUriString);
-				return await commands.executeCommand<WorkspaceEdit>(
+				const result = await commands.executeCommand<WorkspaceEdit>(
 					'vscode.executeDocumentRenameProvider',
-					vdocUri,
+					vdocUri(document),
 					position,
 					newName
 				);
+				console.debug(result);
+				return result;
 			},
-			provideDocumentFormattingEdits: async (document, options, token, next) => {
-				console.log("doing formatting!");
+			provideReferences: async (document, position, options, token, next) => {
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, options, token);
+				}
+				console.log("doing references!");
 
-				const originalUri = document.uri.toString(true);
-				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
-
-				const vdocUriString = `embedded-content://html/${encodeURIComponent(
-					originalUri
-				)}.html`;
-
-				const vdocUri = Uri.parse(vdocUriString);
-				return await commands.executeCommand<any>(
-					'vscode.executeFormatDocumentProvider',
-					vdocUri,
-					options
+				const result = await commands.executeCommand<any>(
+					'vscode.executeReferenceProvider',
+					vdocUri(document),
+					position,
 				);
+				console.debug(result);
+				return result;
+			},
+			provideDocumentSymbols: async (document, token, next) => {
+				console.log("doing symbols!");
+				const result = await commands.executeCommand<any>(
+					'vscode.executeDocumentSymbolProvider',
+					vdocUri(document),
+				);
+				console.debug(result);
+				return result;
+			},
+			provideDefinition: async (document, position, token, next) => {
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, token);
+				}
+				console.log("doing definition!");
+				const result = await commands.executeCommand<any>(
+					'vscode.executeDefinitionProvider',
+					vdocUri(document),
+					position,
+				);
+				console.debug(result);
+				return result;
+			},
+			provideHover: async (document, position, token, next) => {
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, token);
+				}
+				console.log("doing hover!");
+				const result = await commands.executeCommand<any>(
+					'vscode.executeHoverProvider',
+					vdocUri(document),
+					position,
+				);
+				console.debug(result);
+				return result;
 			},
 		}
 	};
@@ -129,6 +161,8 @@ export function activate(context: ExtensionContext) {
 	// Start the client. This will also launch the server
 	client.start();
 }
+
+
 
 export function deactivate(): Thenable<void> | undefined {
 	if (!client) {

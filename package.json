@@ -17,13 +17,13 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:rustyew"
+		"onLanguage:rust"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
 		"languages": [
 			{
-				"id": "rustyew",
+				"id": "rust",
 				"aliases": [
 					"Rust Yew",
 					"Rust"
