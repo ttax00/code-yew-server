@@ -5,16 +5,9 @@
 import {
 	createConnection,
 	TextDocuments,
-	Diagnostic,
-	DiagnosticSeverity,
 	ProposedFeatures,
 	InitializeParams,
-	DidChangeConfigurationNotification,
-	CompletionItem,
-	CompletionItemKind,
-	TextDocumentPositionParams,
 	TextDocumentSyncKind,
-	InitializeResult
 } from 'vscode-languageserver/node';
 import { getLanguageService } from 'vscode-html-languageservice';
 import {
@@ -35,7 +28,8 @@ connection.onInitialize((_params: InitializeParams) => {
 	return {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Full,
-			// Tell the client that the server supports code completion
+			renameProvider: true,
+			documentFormattingProvider: true,
 			completionProvider: {
 				resolveProvider: false
 			}
@@ -44,11 +38,12 @@ connection.onInitialize((_params: InitializeParams) => {
 });
 
 connection.onCompletion(async (completionParam, token) => {
+	connection.console.log("called completion");
+
 	const document = documents.get(completionParam.textDocument.uri);
 	if (!document) {
 		return null;
 	}
-
 	return htmlLanguageService.doComplete(
 		document,
 		completionParam.position,
@@ -57,11 +52,13 @@ connection.onCompletion(async (completionParam, token) => {
 });
 
 connection.onRenameRequest(async (renameParam, token) => {
+	connection.console.log("called rename");
+
 	const document = documents.get(renameParam.textDocument.uri);
 	if (!document) {
 		return null;
 	}
-	console.debug(renameParam);
+	connection.console.log(document.getText());
 	return htmlLanguageService.doRename(document,
 		renameParam.position,
 		renameParam.newName,
@@ -69,6 +66,19 @@ connection.onRenameRequest(async (renameParam, token) => {
 	);
 });
 
+connection.onDocumentFormatting(async (formatParam, token) => {
+	connection.console.log("called formatting");
+
+	const document = documents.get(formatParam.textDocument.uri);
+	if (!document) {
+		return null;
+	}
+	console.debug(formatParam);
+	return htmlLanguageService.format(document,
+		undefined,
+		formatParam.options
+	);
+});
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

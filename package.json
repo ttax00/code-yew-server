@@ -17,13 +17,13 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
-		"onLanguage:rust"
+		"onLanguage:rustyew"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
 		"languages": [
 			{
-				"id": "rust",
+				"id": "rustyew",
 				"aliases": [
 					"Rust Yew",
 					"Rust"
@@ -42,7 +42,7 @@
 				"scopeName": "source.rust.yew",
 				"path": "./syntaxes/yew.injection.json",
 				"embeddedLanguages": {
-					"source.rust.yew.html": "javascriptreact",
+					"source.rust.yew.html": "html",
 					"source.rust.yew": "rust"
 				},
 				"tokenTypes": {

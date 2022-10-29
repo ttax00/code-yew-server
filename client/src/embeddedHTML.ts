@@ -41,8 +41,6 @@ export function getHTMLVirtualContent(documentText: string) {
 	content = content.replace(/<>/g, '  ');
 	content = content.replace(/<\/>/g, '   ');
 
-	console.debug(content);
-	console.debug(regions);
 	return content;
 }
 

@@ -4,18 +4,18 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location, DocumentFormattingEditProvider, ProviderResult, CustomDocumentEditEvent } from 'vscode';
+import { TextEdit } from 'vscode-html-languageservice';
 
 
 import {
 	LanguageClient,
 	LanguageClientOptions,
-	RenameOptions,
-	RenameParams,
+	ProvideDocumentFormattingEditsSignature,
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { getHTMLVirtualContent, isInsideHTMLRegion } from './embededHTML';
+import { getHTMLVirtualContent, isInsideHTMLRegion } from './embeddedHTML';
 
 let client: LanguageClient;
 
@@ -52,13 +52,14 @@ export function activate(context: ExtensionContext) {
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for rust documents
-		documentSelector: [{ scheme: 'file', language: 'rust' }],
+		documentSelector: [{ scheme: 'file', language: 'rustyew' }],
 		middleware: {
 			provideCompletionItem: async (document, position, context, token, next) => {
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
+				console.log("doing complete!");
 
 				const originalUri = document.uri.toString(true);
 				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
@@ -75,12 +76,11 @@ export function activate(context: ExtensionContext) {
 				);
 			},
 			provideRenameEdits: async (document, position, newName, token, next) => {
-				console.log("working");
-
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, newName, token);
 				}
+				console.log("doing rename!");
 
 				const originalUri = document.uri.toString(true);
 				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
@@ -97,13 +97,8 @@ export function activate(context: ExtensionContext) {
 					newName
 				);
 			},
-			provideReferences: async (document, position, options, token, next) => {
-				console.log("working");
-
-				// If not in `html! {}`, do not perform request forwarding
-				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
-					return await next(document, position, options, token);
-				}
+			provideDocumentFormattingEdits: async (document, options, token, next) => {
+				console.log("doing formatting!");
 
 				const originalUri = document.uri.toString(true);
 				virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
@@ -113,10 +108,10 @@ export function activate(context: ExtensionContext) {
 				)}.html`;
 
 				const vdocUri = Uri.parse(vdocUriString);
-				return await commands.executeCommand<Location[]>(
-					'vscode.executeReferenceProvider',
+				return await commands.executeCommand<any>(
+					'vscode.executeFormatDocumentProvider',
 					vdocUri,
-					position
+					options
 				);
 			},
 		}
@@ -124,8 +119,8 @@ export function activate(context: ExtensionContext) {
 
 	// Create the language client and start the client.
 	client = new LanguageClient(
-		'languageServerExample',
-		'Language Server Example',
+		'rustYewServer',
+		'Rust Yew Server',
 		serverOptions,
 		clientOptions
 	);
