@@ -1,5 +1,4 @@
-import { Position, Range } from 'vscode-languageclient';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+
 
 interface EmbeddedRegion {
 	languageId: string | undefined;
