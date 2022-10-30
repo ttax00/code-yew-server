@@ -4,14 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, WorkspaceEdit, ReferenceProvider, RenameProvider, Location, DocumentFormattingEditProvider, ProviderResult, CustomDocumentEditEvent, TextDocument } from 'vscode';
-import { TextEdit } from 'vscode-html-languageservice';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit } from 'vscode';
 
 
 import {
 	LanguageClient,
 	LanguageClientOptions,
-	ProvideDocumentFormattingEditsSignature,
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
@@ -42,30 +40,32 @@ export function activate(context: ExtensionContext) {
 
 	workspace.registerTextDocumentContentProvider('embedded-content', {
 		provideTextDocumentContent: uri => {
-			const originalUri = uri.path.slice(1).slice(0, -5);
-			const decodedUri = decodeURIComponent(originalUri);
-			return virtualDocumentContents.get(decodedUri);
+			const key = uri.toString();
+			const val = virtualDocumentContents.get(key);
+			return val;
 		}
 	});
 
 	function vdocUri(document: TextDocument) {
-		const originalUri = document.uri.toString(true);
-		virtualDocumentContents.set(originalUri, getHTMLVirtualContent(document.getText()));
-
+		const originalUri = document.uri.path;
 		const vdocUriString = `embedded-content://html/${encodeURIComponent(
 			originalUri
 		)}.html`;
+		const vUri = Uri.parse(vdocUriString);
 
-		return Uri.parse(vdocUriString);
+		virtualDocumentContents.set(vUri.toString(), getHTMLVirtualContent(document.getText()));
+		// virtualDocumentContents.set(vUri.toString(), "<div></div > ");
+		console.debug(virtualDocumentContents);
+		return vUri;
 	}
 
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
 		// Register the server for rust documents
-		documentSelector: [{ scheme: 'file', language: 'rust' }],
+		documentSelector: [{ scheme: 'file', language: 'rustyew' }, { scheme: 'file', language: 'rust' }],
 		middleware: {
-			provideCompletionItem: async (document, position, context, token, next) => {
+			async provideCompletionItem(document, position, context, token, next) {
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
@@ -78,71 +78,49 @@ export function activate(context: ExtensionContext) {
 				);
 				return result;
 			},
-			provideRenameEdits: async (document, position, newName, token, next) => {
+			async provideRenameEdits(document, position, newName, token, next) {
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, newName, token);
 				}
 				console.log("doing rename!");
-
+				// FIXME: [1] rust-analyzer's rename still take priority inside `html! {}` scope
+				// FIXME: [2] even when called on `<div></div> virtual document, returned unexpected type
 				const result = await commands.executeCommand<WorkspaceEdit>(
 					'vscode.executeDocumentRenameProvider',
 					vdocUri(document),
 					position,
 					newName
 				);
-				console.debug(result);
+				console.debug(typeof result);
 				return result;
 			},
-			provideReferences: async (document, position, options, token, next) => {
-				// If not in `html! {}`, do not perform request forwarding
-				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
-					return await next(document, position, options, token);
-				}
-				console.log("doing references!");
-
-				const result = await commands.executeCommand<any>(
-					'vscode.executeReferenceProvider',
-					vdocUri(document),
-					position,
-				);
-				console.debug(result);
-				return result;
-			},
-			provideDocumentSymbols: async (document, token, next) => {
-				console.log("doing symbols!");
-				const result = await commands.executeCommand<any>(
-					'vscode.executeDocumentSymbolProvider',
-					vdocUri(document),
-				);
-				console.debug(result);
-				return result;
-			},
-			provideDefinition: async (document, position, token, next) => {
-				// If not in `html! {}`, do not perform request forwarding
-				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
-					return await next(document, position, token);
-				}
-				console.log("doing definition!");
-				const result = await commands.executeCommand<any>(
-					'vscode.executeDefinitionProvider',
-					vdocUri(document),
-					position,
-				);
-				console.debug(result);
-				return result;
-			},
-			provideHover: async (document, position, token, next) => {
+			async provideHover(document, position, token, next) {
 				// If not in `html! {}`, do not perform request forwarding
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, token);
 				}
 				console.log("doing hover!");
-				const result = await commands.executeCommand<any>(
+				const result = await commands.executeCommand<Hover[]>(
 					'vscode.executeHoverProvider',
 					vdocUri(document),
 					position,
 				);
+				console.debug(result);
+				return result[0];
+			},
+			async provideDocumentSymbols(document, token, next) {
+				console.log("doing symbol!");
+				let result = undefined;
+				// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
+				// FIXME: [2] HTML document symbol provided are greatly missing!
+				while (!result) {
+					result = await commands.executeCommand<DocumentSymbol[]>(
+						'vscode.executeDocumentSymbolProvider',
+						vdocUri(document),
+					);
+				}
+
 				console.debug(result);
 				return result;
 			},
