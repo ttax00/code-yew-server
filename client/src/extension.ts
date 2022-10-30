@@ -70,12 +70,15 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
+				console.log("doing completion!");
 				const result = await commands.executeCommand<CompletionList>(
 					'vscode.executeCompletionItemProvider',
 					vdocUri(document),
 					position,
 					context.triggerCharacter
 				);
+
+				console.debug(result);
 				return result;
 			},
 			async provideRenameEdits(document, position, newName, token, next) {
