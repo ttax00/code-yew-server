@@ -4,7 +4,6 @@
  * ------------------------------------------------------------------------------------------ */
 import {
 	createConnection,
-	TextDocuments,
 	ProposedFeatures,
 	InitializeParams,
 	TextDocumentSyncKind,
