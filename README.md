@@ -1,7 +1,7 @@
 # VSCode Rust-Yew extension
 
 ## Acknowledgements  
-This project took inspiration from Alexandre-Borghi's [yew-highilighting](https://github.com/Alexandre-Borghi/yew-highlighting) extension. And guided by VSCode documentation on [embedded languages](https://code.visualstudio.com/api/language-extensions/embedded-languages) extension.
+This project took inspiration from Alexandre Borghi's [yew-highlighting](https://github.com/Alexandre-Borghi/yew-highlighting) extension. And guided by VSCode documentation on [embedded languages](https://code.visualstudio.com/api/language-extensions/embedded-languages) extension.
 
 ## Features
 - Highlights `html! {}` macros.
