@@ -77,6 +77,8 @@ export function activate(context: ExtensionContext) {
 					position,
 					context.triggerCharacter
 				);
+				// filter aria-* items which are invalid
+				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
 
 				console.debug(result);
 				return result;
