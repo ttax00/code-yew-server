@@ -17,6 +17,7 @@
 		"vscode": "^1.63.0"
 	},
 	"activationEvents": [
+		"onLanguage:rustyew",
 		"onLanguage:rust"
 	],
 	"main": "./client/out/extension",
@@ -68,9 +69,5 @@
 		"eslint": "^8.13.0",
 		"mocha": "^9.2.1",
 		"typescript": "^4.8.4"
-	},
-	"dependencies": {
-		"vscode-html-languageservice": "^5.0.2",
-		"vscode-languageserver-textdocument": "^1.0.7"
 	}
 }
