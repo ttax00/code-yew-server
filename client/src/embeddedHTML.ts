@@ -1,6 +1,5 @@
 import { Position, Range } from 'vscode-languageclient';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { LanguageService, TokenType } from 'vscode-html-languageservice';
 
 interface EmbeddedRegion {
 	languageId: string | undefined;
@@ -40,7 +39,7 @@ export function getHTMLVirtualContent(documentText: string) {
 
 	content = content.replace(/<>/g, '  ');
 	content = content.replace(/<\/>/g, '   ');
-	console.log(content);
+	content = content.replace(/<.*\/>/g, "");
 	return content;
 }
 
