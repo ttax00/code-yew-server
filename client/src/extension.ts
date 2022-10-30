@@ -92,7 +92,7 @@ export function activate(context: ExtensionContext) {
 					position,
 					newName
 				);
-				console.debug(typeof result);
+				console.debug(result);
 				return result;
 			},
 			async provideHover(document, position, token, next) {
@@ -114,12 +114,10 @@ export function activate(context: ExtensionContext) {
 				let result = undefined;
 				// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 				// FIXME: [2] HTML document symbol provided are greatly missing!
-				while (!result) {
-					result = await commands.executeCommand<DocumentSymbol[]>(
-						'vscode.executeDocumentSymbolProvider',
-						vdocUri(document),
-					);
-				}
+				result = await commands.executeCommand<DocumentSymbol[]>(
+					'vscode.executeDocumentSymbolProvider',
+					vdocUri(document),
+				);
 
 				console.debug(result);
 				return result;

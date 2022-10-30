@@ -8,6 +8,12 @@ interface EmbeddedRegion {
 }
 
 export function isInsideHTMLRegion(documentText: string, offset: number) {
+	// Don't parse on no html! macro document
+	// eslint-disable-next-line no-constant-condition
+	if (true) {
+		return false;
+	}
+
 	const regions = getRegions(documentText);
 	let answer = false;
 	regions.forEach((r) => {
