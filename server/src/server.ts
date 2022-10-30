@@ -25,17 +25,25 @@ connection.onInitialize((_params: InitializeParams) => {
 	return {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Full,
-			renameProvider: true,
 			completionProvider: {
 				resolveProvider: false
 			},
-			referencesProvider: true,
-			documentSymbolProvider: true,
-			definitionProvider: true,
 			hoverProvider: true,
+			documentSymbolProvider: true,
+			renameProvider: true,
 		}
 	};
 });
+connection.onRenameRequest(() => null);
+connection.onCompletion(() => null);
+connection.onReferences(() => null);
+connection.onDocumentSymbol(() => []);
+connection.onDefinition(() => null);
+connection.onHover(() => null);
+connection.onTypeDefinition(() => null);
+
+
+
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
