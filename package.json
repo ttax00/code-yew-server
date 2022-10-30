@@ -1,21 +1,24 @@
 {
-	"name": "lsp-sample",
-	"description": "A language server example",
-	"author": "Microsoft Corporation",
-	"license": "MIT",
-	"version": "1.0.0",
+	"name": "rust-yew",
+	"description": "A wip language extension for Yew HTML syntaxes in rust.",
+	"author": "TechTheAwesome",
+	"version": "0.1.0",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": "https://github.com/TechTheAwesome"
 	},
-	"publisher": "vscode-samples",
-	"categories": [],
 	"keywords": [
-		"multi-root ready"
+		"rust",
+		"yew",
+		"highlighting",
+		"language"
 	],
 	"engines": {
-		"vscode": "^1.63.0"
+		"vscode": "^1.72.0"
 	},
+	"categories": [
+		"Other"
+	],
 	"activationEvents": [
 		"onLanguage:rustyew",
 		"onLanguage:rust"
