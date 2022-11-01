@@ -1,8 +1,8 @@
 {
-	"name": "lsp-sample-client",
+	"name": "rust-yew-client",
 	"description": "VSCode part of a language server",
 	"author": "Microsoft Corporation",
-	"license": "MIT",
+	"license": "GPL-3.0",
 	"version": "0.0.1",
 	"publisher": "vscode",
 	"repository": {
