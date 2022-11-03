@@ -8,7 +8,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { getHTMLVirtualContent, isInsideHTMLRegion } from './embeddedHTML';
+import { getHTMLVirtualContent, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
 
 let client: LanguageClient;
 
@@ -100,28 +100,36 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, token);
 				}
-				console.log("doing hover!");
 				const result = await commands.executeCommand<Hover[]>(
 					'vscode.executeHoverProvider',
 					vdocUri(document),
 					position,
 				);
-				console.debug(result);
 				return result[0];
 			},
 			async provideDocumentSymbols(document, token, next) {
+				if (!isValidRustYew(document.getText())) {
+					return next(document, token);
+				}
 				console.log("doing symbol!");
-				let result = undefined;
+
 				// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 				// FIXME: [2] HTML document symbol provided are greatly missing!
-				result = await commands.executeCommand<DocumentSymbol[]>(
-					'vscode.executeDocumentSymbolProvider',
-					vdocUri(document),
-				);
-
-				console.debug(result);
-				return result;
-			},
+				let result: undefined | DocumentSymbol[] = undefined;
+				let count = 0;
+				while (result === undefined && count < 5) {
+					await new Promise(r => setTimeout(r, 1000));
+					result = await commands.executeCommand<DocumentSymbol[]>(
+						'vscode.executeDocumentSymbolProvider',
+						vdocUri(document),
+					);
+					count++;
+				}
+				let answer: DocumentSymbol[] = [];
+				result.forEach(s => answer = answer.concat(unpackDocumentSymbolChildren(s)));
+				console.debug(answer);
+				return answer;
+			}
 		}
 	};
 
