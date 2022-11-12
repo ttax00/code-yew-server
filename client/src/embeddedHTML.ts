@@ -1,3 +1,4 @@
+import { DocumentSymbol, SymbolInformation } from 'vscode';
 
 
 interface EmbeddedRegion {
@@ -7,9 +8,18 @@ interface EmbeddedRegion {
 	attributeValue?: boolean;
 }
 
+export function isValidRustYew(documentText: string) {
+	if (documentText.match(/html! {.*}/gs)) {
+		// valid if there is at least one html! { ... } macro
+		return true;
+	} else {
+		return false;
+	}
+}
+
 export function isInsideHTMLRegion(documentText: string, offset: number) {
-	// Don't parse on no html! macro document
-	if (documentText.match(/html! {.*}/g)) {
+	// Don't parse on no html! macro documents
+	if (!isValidRustYew(documentText)) {
 		return false;
 	}
 
@@ -102,4 +112,14 @@ export function getRegions(documentText: string) {
 	});
 
 	return regions;
+}
+
+export function unpackDocumentSymbolChildren(symbol: DocumentSymbol): DocumentSymbol[] {
+	let result: DocumentSymbol[] = [];
+	result.push(symbol);
+	if (symbol.children.length > 0) {
+		symbol.children.forEach(s => result = result.concat(unpackDocumentSymbolChildren(s)));
+	}
+	console.debug(result);
+	return result;
 }
