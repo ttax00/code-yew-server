@@ -4,6 +4,8 @@
 	"author": "TechTheAwesome",
 	"publisher": "TechTheAwesome",
 	"version": "0.1.0",
+	"pricing": "Free",
+	"icon": "rustyew.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/TechTheAwesome"
