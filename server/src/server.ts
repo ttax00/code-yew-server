@@ -22,7 +22,9 @@ connection.onInitialize((_params: InitializeParams) => {
 			},
 			hoverProvider: true,
 			documentSymbolProvider: true,
-			renameProvider: true,
+			renameProvider: {
+				prepareProvider: true
+			},
 		}
 	};
 });

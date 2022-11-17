@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit } from 'vscode';
 
-
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -33,22 +32,22 @@ export function activate(context: ExtensionContext) {
 	};
 	const virtualDocumentContents = new Map<string, string>();
 
-	workspace.registerTextDocumentContentProvider('embedded-content', {
+	workspace.registerTextDocumentContentProvider('embedded', {
 		provideTextDocumentContent: uri => {
-			const key = uri.toString();
-			const val = virtualDocumentContents.get(key);
+			console.log(`Returning URL: ${uri.toString(true)}`);
+			const val = virtualDocumentContents.get(uri.toString(true));
 			return val;
 		}
 	});
 
 	function vdocUri(document: TextDocument) {
-		const originalUri = document.uri.path;
-		const vdocUriString = `embedded-content://html/${encodeURIComponent(
+		const originalUri = document.uri.toString(true);
+		const vdocUriString = `embedded://html/${encodeURIComponent(
 			originalUri
 		)}.html`;
 		const vUri = Uri.parse(vdocUriString);
 
-		virtualDocumentContents.set(vUri.toString(), getHTMLVirtualContent(document.getText()));
+		virtualDocumentContents.set(vUri.toString(true), getHTMLVirtualContent(document.getText()));
 		// virtualDocumentContents.set(vUri.toString(), "<div></div > ");
 		return vUri;
 	}
@@ -72,6 +71,20 @@ export function activate(context: ExtensionContext) {
 				);
 				// filter aria-* items which are invalid
 				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
+
+				console.debug(result);
+				return result;
+			},
+			async prepareRename(document, position, token, next) {
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, token);
+				}
+				const result = await commands.executeCommand<Range>(
+					'vscode.prepareRename',
+					vdocUri(document),
+					position
+				);
 				return result;
 			},
 			async provideRenameEdits(document, position, newName, token, next) {
