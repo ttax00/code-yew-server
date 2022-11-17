@@ -101,7 +101,7 @@ export function activate(context: ExtensionContext) {
 				const symbol = flat.filter((s) => {
 					return s.range.start.line === position.line || s.range.end.line === position.line;
 				}).find((s) => {
-					const { length } = getSymbolShortName(symbol.name);
+					const { length } = getSymbolShortName(s.name);
 					const { character } = position;
 					const { start, end } = s.range;
 					return ((start.character < character && character <= start.character + length + 1)
@@ -119,11 +119,6 @@ export function activate(context: ExtensionContext) {
 							new Position(start.line, start.character + 1 + length)), newName),
 					]);
 				}
-
-
-				console.log(position);
-				console.log(symbol);
-				console.log(edit);
 				return edit;
 			},
 			async provideHover(document, position, token, next) {
