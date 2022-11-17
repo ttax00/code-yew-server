@@ -8,7 +8,6 @@
 
 ![GitHub](https://img.shields.io/github/license/TechTheAwesome/code-yew-server?style=for-the-badge)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/techtheawesome/code-yew-server/Typescript?style=for-the-badge)
-![wakatime](https://wakatime.com/badge/user/4312729e-bc28-4bc0-9074-161a64a7ad20/project/40b6a142-0f2e-4adf-9e89-a69b4f4c9792.svg?style=for-the-badge)
 
 An extension that provides some language features for [Yew](https://yew.rs/)'s html macro syntax in Rus
 
