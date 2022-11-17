@@ -129,3 +129,13 @@ export function flattenDocumentSymbols(symbols: DocumentSymbol[]) {
 	symbols.forEach(s => flat = flat.concat(unpackDocumentSymbolChildren(s)));
 	return flat;
 }
+
+export function getSymbolShortName(symbol: string): string {
+	const match = symbol.match(/\w*[^.]/);
+	if (match.length === 1) {
+		return match[0];
+	} else {
+		throw Error(`symbol name might be wrong ${symbol}`);
+		return '';
+	}
+}

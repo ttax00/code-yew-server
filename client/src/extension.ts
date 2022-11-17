@@ -7,7 +7,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { flattenDocumentSymbols, getHTMLVirtualContent, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
+import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
 
 let client: LanguageClient;
 
@@ -34,7 +34,6 @@ export function activate(context: ExtensionContext) {
 
 	workspace.registerTextDocumentContentProvider('embedded', {
 		provideTextDocumentContent: uri => {
-			console.log(`Returning URL: ${uri.toString(true)}`);
 			const val = virtualDocumentContents.get(uri.toString(true));
 			return val;
 		}
@@ -92,17 +91,17 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, newName, token);
 				}
-				console.log("doing rename!");
 				const edit: WorkspaceEdit = new WorkspaceEdit();
 				const symbols = await commands.executeCommand<DocumentSymbol[]>(
 					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
 				);
+
 				const flat = flattenDocumentSymbols(symbols);
 				const symbol = flat.filter((s) => {
 					return s.range.start.line === position.line || s.range.end.line === position.line;
 				}).find((s) => {
-					const { length } = s.name;
+					const { length } = getSymbolShortName(symbol.name);
 					const { character } = position;
 					const { start, end } = s.range;
 					return ((start.character < character && character <= start.character + length + 1)
@@ -112,11 +111,12 @@ export function activate(context: ExtensionContext) {
 
 				if (symbol) {
 					const { start, end } = symbol.range;
+					const { length } = getSymbolShortName(symbol.name);
 					edit.set(document.uri, [
-						new TextEdit(new Range(new Position(end.line, end.character - 1 - symbol.name.length),
+						new TextEdit(new Range(new Position(end.line, end.character - 1 - length),
 							new Position(end.line, end.character - 1),), newName),
 						new TextEdit(new Range(new Position(start.line, start.character + 1),
-							new Position(start.line, start.character + 1 + symbol.name.length)), newName),
+							new Position(start.line, start.character + 1 + length)), newName),
 					]);
 				}
 
