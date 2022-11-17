@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit } from 'vscode';
 
 
 import {
@@ -8,7 +8,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { getHTMLVirtualContent, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
+import { flattenDocumentSymbols, getHTMLVirtualContent, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
 
 let client: LanguageClient;
 
@@ -50,7 +50,6 @@ export function activate(context: ExtensionContext) {
 
 		virtualDocumentContents.set(vUri.toString(), getHTMLVirtualContent(document.getText()));
 		// virtualDocumentContents.set(vUri.toString(), "<div></div > ");
-		console.debug(virtualDocumentContents);
 		return vUri;
 	}
 
@@ -65,7 +64,6 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
-				console.log("doing completion!");
 				const result = await commands.executeCommand<CompletionList>(
 					'vscode.executeCompletionItemProvider',
 					vdocUri(document),
@@ -74,8 +72,6 @@ export function activate(context: ExtensionContext) {
 				);
 				// filter aria-* items which are invalid
 				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
-
-				console.debug(result);
 				return result;
 			},
 			async provideRenameEdits(document, position, newName, token, next) {
@@ -84,16 +80,38 @@ export function activate(context: ExtensionContext) {
 					return await next(document, position, newName, token);
 				}
 				console.log("doing rename!");
-				// FIXME: [1] rust-analyzer's rename still take priority inside `html! {}` scope
-				// FIXME: [2] even when called on `<div></div> virtual document, returned unexpected type
-				const result = await commands.executeCommand<WorkspaceEdit>(
-					'vscode.executeDocumentRenameProvider',
+				const edit: WorkspaceEdit = new WorkspaceEdit();
+				const symbols = await commands.executeCommand<DocumentSymbol[]>(
+					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
-					position,
-					newName
 				);
-				console.debug(result);
-				return result;
+				const flat = flattenDocumentSymbols(symbols);
+				const symbol = flat.filter((s) => {
+					return s.range.start.line === position.line || s.range.end.line === position.line;
+				}).find((s) => {
+					const { length } = s.name;
+					const { character } = position;
+					const { start, end } = s.range;
+					return ((start.character < character && character <= start.character + length + 1)
+						|| (end.character - length - 1 <= character && character < end.character));
+
+				});
+
+				if (symbol) {
+					const { start, end } = symbol.range;
+					edit.set(document.uri, [
+						new TextEdit(new Range(new Position(end.line, end.character - 1 - symbol.name.length),
+							new Position(end.line, end.character - 1),), newName),
+						new TextEdit(new Range(new Position(start.line, start.character + 1),
+							new Position(start.line, start.character + 1 + symbol.name.length)), newName),
+					]);
+				}
+
+
+				console.log(position);
+				console.log(symbol);
+				console.log(edit);
+				return edit;
 			},
 			async provideHover(document, position, token, next) {
 				// If not in `html! {}`, do not perform request forwarding
@@ -111,8 +129,6 @@ export function activate(context: ExtensionContext) {
 				if (!isValidRustYew(document.getText())) {
 					return next(document, token);
 				}
-				console.log("doing symbol!");
-
 				// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 				// FIXME: [2] HTML document symbol provided are greatly missing!
 				let result: undefined | DocumentSymbol[] = undefined;
@@ -125,10 +141,7 @@ export function activate(context: ExtensionContext) {
 					);
 					count++;
 				}
-				let answer: DocumentSymbol[] = [];
-				result.forEach(s => answer = answer.concat(unpackDocumentSymbolChildren(s)));
-				console.debug(answer);
-				return answer;
+				return flattenDocumentSymbols(result);
 			}
 		}
 	};
