@@ -2,7 +2,7 @@
 
 <img
     style="display: block;margin: auto;width: 20%;"
-    src="rustyew.png"
+    src="https://raw.githubusercontent.com/TechTheAwesome/code-yew-server/main/rustyew.png"
     alt="Pandora Logo">
 </img>
 
