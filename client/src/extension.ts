@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit } from 'vscode';
+import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind } from 'vscode';
 
 import {
 	LanguageClient,
@@ -68,10 +68,12 @@ export function activate(context: ExtensionContext) {
 					position,
 					context.triggerCharacter
 				);
-				// filter aria-* items which are invalid
+				// filter valid items
+				result.items = result.items.filter((i) => i.kind === CompletionItemKind.Property
+					|| i.kind === CompletionItemKind.Value);
 				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
 
-				console.debug(result);
+				console.log(result);
 				return result;
 			},
 			async prepareRename(document, position, token, next) {
