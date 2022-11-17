@@ -73,7 +73,6 @@ export function activate(context: ExtensionContext) {
 					|| i.kind === CompletionItemKind.Value);
 				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
 
-				console.log(result);
 				return result;
 			},
 			async prepareRename(document, position, token, next) {
@@ -164,7 +163,7 @@ export function activate(context: ExtensionContext) {
 		clientOptions
 	);
 
-	console.debug("server & client started");
+	console.log("server & client started");
 	// Start the client. This will also launch the server
 	client.start();
 }
