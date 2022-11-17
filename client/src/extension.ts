@@ -1,6 +1,5 @@
 import * as path from 'path';
-import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit } from 'vscode';
-
+import { workspace, ExtensionContext, commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind } from 'vscode';
 
 import {
 	LanguageClient,
@@ -8,7 +7,7 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { getHTMLVirtualContent, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
+import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidRustYew, unpackDocumentSymbolChildren as unpackDocumentSymbolChildren } from './embeddedHTML';
 
 let client: LanguageClient;
 
@@ -33,24 +32,22 @@ export function activate(context: ExtensionContext) {
 	};
 	const virtualDocumentContents = new Map<string, string>();
 
-	workspace.registerTextDocumentContentProvider('embedded-content', {
+	workspace.registerTextDocumentContentProvider('embedded', {
 		provideTextDocumentContent: uri => {
-			const key = uri.toString();
-			const val = virtualDocumentContents.get(key);
+			const val = virtualDocumentContents.get(uri.toString(true));
 			return val;
 		}
 	});
 
 	function vdocUri(document: TextDocument) {
-		const originalUri = document.uri.path;
-		const vdocUriString = `embedded-content://html/${encodeURIComponent(
+		const originalUri = document.uri.toString(true);
+		const vdocUriString = `embedded://html/${encodeURIComponent(
 			originalUri
 		)}.html`;
 		const vUri = Uri.parse(vdocUriString);
 
-		virtualDocumentContents.set(vUri.toString(), getHTMLVirtualContent(document.getText()));
+		virtualDocumentContents.set(vUri.toString(true), getHTMLVirtualContent(document.getText()));
 		// virtualDocumentContents.set(vUri.toString(), "<div></div > ");
-		console.debug(virtualDocumentContents);
 		return vUri;
 	}
 
@@ -65,17 +62,30 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, context, token);
 				}
-				console.log("doing completion!");
 				const result = await commands.executeCommand<CompletionList>(
 					'vscode.executeCompletionItemProvider',
 					vdocUri(document),
 					position,
 					context.triggerCharacter
 				);
-				// filter aria-* items which are invalid
+				// filter valid items
+				result.items = result.items.filter((i) => i.kind === CompletionItemKind.Property
+					|| i.kind === CompletionItemKind.Value);
 				result.items = result.items.filter((i) => !i.label.toString().match(/aria-.*/g));
 
-				console.debug(result);
+				console.log(result);
+				return result;
+			},
+			async prepareRename(document, position, token, next) {
+				// If not in `html! {}`, do not perform request forwarding
+				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
+					return await next(document, position, token);
+				}
+				const result = await commands.executeCommand<Range>(
+					'vscode.prepareRename',
+					vdocUri(document),
+					position
+				);
 				return result;
 			},
 			async provideRenameEdits(document, position, newName, token, next) {
@@ -83,17 +93,35 @@ export function activate(context: ExtensionContext) {
 				if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 					return await next(document, position, newName, token);
 				}
-				console.log("doing rename!");
-				// FIXME: [1] rust-analyzer's rename still take priority inside `html! {}` scope
-				// FIXME: [2] even when called on `<div></div> virtual document, returned unexpected type
-				const result = await commands.executeCommand<WorkspaceEdit>(
-					'vscode.executeDocumentRenameProvider',
+				const edit: WorkspaceEdit = new WorkspaceEdit();
+				const symbols = await commands.executeCommand<DocumentSymbol[]>(
+					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
-					position,
-					newName
 				);
-				console.debug(result);
-				return result;
+
+				const flat = flattenDocumentSymbols(symbols);
+				const symbol = flat.filter((s) => {
+					return s.range.start.line === position.line || s.range.end.line === position.line;
+				}).find((s) => {
+					const { length } = getSymbolShortName(s.name);
+					const { character } = position;
+					const { start, end } = s.range;
+					return ((start.character < character && character <= start.character + length + 1)
+						|| (end.character - length - 1 <= character && character < end.character));
+
+				});
+
+				if (symbol) {
+					const { start, end } = symbol.range;
+					const { length } = getSymbolShortName(symbol.name);
+					edit.set(document.uri, [
+						new TextEdit(new Range(new Position(end.line, end.character - 1 - length),
+							new Position(end.line, end.character - 1),), newName),
+						new TextEdit(new Range(new Position(start.line, start.character + 1),
+							new Position(start.line, start.character + 1 + length)), newName),
+					]);
+				}
+				return edit;
 			},
 			async provideHover(document, position, token, next) {
 				// If not in `html! {}`, do not perform request forwarding
@@ -111,8 +139,6 @@ export function activate(context: ExtensionContext) {
 				if (!isValidRustYew(document.getText())) {
 					return next(document, token);
 				}
-				console.log("doing symbol!");
-
 				// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 				// FIXME: [2] HTML document symbol provided are greatly missing!
 				let result: undefined | DocumentSymbol[] = undefined;
@@ -125,10 +151,7 @@ export function activate(context: ExtensionContext) {
 					);
 					count++;
 				}
-				let answer: DocumentSymbol[] = [];
-				result.forEach(s => answer = answer.concat(unpackDocumentSymbolChildren(s)));
-				console.debug(answer);
-				return answer;
+				return flattenDocumentSymbols(result);
 			}
 		}
 	};

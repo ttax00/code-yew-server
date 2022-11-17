@@ -120,6 +120,22 @@ export function unpackDocumentSymbolChildren(symbol: DocumentSymbol): DocumentSy
 	if (symbol.children.length > 0) {
 		symbol.children.forEach(s => result = result.concat(unpackDocumentSymbolChildren(s)));
 	}
-	console.debug(result);
 	return result;
+}
+
+export function flattenDocumentSymbols(symbols: DocumentSymbol[]) {
+
+	let flat: DocumentSymbol[] = [];
+	symbols.forEach(s => flat = flat.concat(unpackDocumentSymbolChildren(s)));
+	return flat;
+}
+
+export function getSymbolShortName(symbol: string): string {
+	const match = symbol.match(/\w*[^.]/);
+	if (match.length === 1) {
+		return match[0];
+	} else {
+		throw Error(`symbol name might be wrong ${symbol}`);
+		return '';
+	}
 }
