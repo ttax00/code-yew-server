@@ -7,7 +7,7 @@
 </img>
 
 ![GitHub](https://img.shields.io/github/license/TechTheAwesome/code-yew-server?style=for-the-badge)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/techtheawesome/code-yew-server/Typescript?style=for-the-badge)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TechTheAwesome/code-yew-server/ci.yml?style=for-the-badge)
 
 An extension that provides some language features for [Yew](https://yew.rs/)'s html macro syntax in Rus
 
