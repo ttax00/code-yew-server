@@ -106,17 +106,19 @@ export const clientOptions: LanguageClientOptions = {
 				return next(document, token);
 			}
 			// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
-			// FIXME: [2] HTML document symbol provided are greatly missing!
+			// TEMP: try again every 1s, timeout at 5 times.
 			let result: undefined | DocumentSymbol[] = undefined;
-			let count = 0;
-			while (result === undefined && count < 5) {
-				await new Promise(r => setTimeout(r, 1000));
+			let counter = 0;
+			const id = setInterval(async () => {
 				result = await commands.executeCommand<DocumentSymbol[]>(
 					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
 				);
-				count++;
-			}
+				counter++;
+				if (result !== undefined || counter >= 5) {
+					clearInterval(id);
+				}
+			}, 1000);
 			return flattenDocumentSymbols(result);
 		}
 	}
