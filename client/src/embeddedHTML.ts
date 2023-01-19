@@ -1,6 +1,5 @@
 import { DocumentSymbol, SymbolInformation } from 'vscode';
 
-
 interface EmbeddedRegion {
 	languageId: string | undefined;
 	start: number;
@@ -8,16 +7,12 @@ interface EmbeddedRegion {
 	attributeValue?: boolean;
 }
 
-export function isValidRustYew(documentText: string) {
-	if (documentText.match(/html! {.*}/gs)) {
-		return true;
-	} else {
-		return false;
-	}
+export function isValidHTMLMacro(documentText: string) {
+	return !!documentText.match(/html! {.*}/gs);
 }
 
 export function isInsideHTMLRegion(documentText: string, offset: number) {
-	if (!isValidRustYew(documentText)) {
+	if (!isValidHTMLMacro(documentText)) {
 		return false;
 	}
 
@@ -129,11 +124,6 @@ export function flattenDocumentSymbols(symbols: DocumentSymbol[]) {
 }
 
 export function getSymbolShortName(symbol: string): string {
-	const match = symbol.match(/\w*[^.]/);
-	if (match.length === 1) {
-		return match[0];
-	} else {
-		throw Error(`symbol name might be wrong ${symbol}`);
-		return '';
-	}
+	const match = symbol.match(/^.*?(?=\.)/);
+	return match ? match[0] : '';
 }

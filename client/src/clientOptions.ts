@@ -3,7 +3,7 @@ import { commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, Wor
 import {
 	LanguageClientOptions
 } from 'vscode-languageclient/node';
-import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidRustYew } from './embeddedHTML';
+import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
 import { virtualDocumentContents } from './extension';
 
 
@@ -96,7 +96,7 @@ export const clientOptions: LanguageClientOptions = {
 			return result[0];
 		},
 		async provideDocumentSymbols(document, token, next) {
-			if (!isValidRustYew(document.getText())) {
+			if (!isValidHTMLMacro(document.getText())) {
 				return next(document, token);
 			}
 			// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
