@@ -10,7 +10,6 @@ interface EmbeddedRegion {
 
 export function isValidRustYew(documentText: string) {
 	if (documentText.match(/html! {.*}/gs)) {
-		// valid if there is at least one html! { ... } macro
 		return true;
 	} else {
 		return false;
@@ -18,7 +17,6 @@ export function isValidRustYew(documentText: string) {
 }
 
 export function isInsideHTMLRegion(documentText: string, offset: number) {
-	// Don't parse on no html! macro documents
 	if (!isValidRustYew(documentText)) {
 		return false;
 	}

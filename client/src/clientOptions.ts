@@ -15,17 +15,14 @@ function vdocUri(document: TextDocument) {
 	const vUri = Uri.parse(vdocUriString);
 
 	virtualDocumentContents.set(vUri.toString(true), getHTMLVirtualContent(document.getText()));
-	// virtualDocumentContents.set(vUri.toString(), "<div></div > ");
+
 	return vUri;
 }
 
-// Options to control the language client
 export const clientOptions: LanguageClientOptions = {
-	// Register the server for rust documents
-	documentSelector: [{ scheme: 'file', language: 'rustyew' }, { scheme: 'file', language: 'rust' }],
+	documentSelector: [{ scheme: 'file', language: 'rust' }],
 	middleware: {
 		async provideCompletionItem(document, position, context, token, next) {
-			// If not in `html! {}`, do not perform request forwarding
 			if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 				return await next(document, position, context, token);
 			}
@@ -43,7 +40,6 @@ export const clientOptions: LanguageClientOptions = {
 			return result;
 		},
 		async prepareRename(document, position, token, next) {
-			// If not in `html! {}`, do not perform request forwarding
 			if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 				return await next(document, position, token);
 			}
@@ -55,7 +51,6 @@ export const clientOptions: LanguageClientOptions = {
 			return result;
 		},
 		async provideRenameEdits(document, position, newName, token, next) {
-			// If not in `html! {}`, do not perform request forwarding
 			if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 				return await next(document, position, newName, token);
 			}
@@ -90,7 +85,6 @@ export const clientOptions: LanguageClientOptions = {
 			return edit;
 		},
 		async provideHover(document, position, token, next) {
-			// If not in `html! {}`, do not perform request forwarding
 			if (!isInsideHTMLRegion(document.getText(), document.offsetAt(position))) {
 				return await next(document, position, token);
 			}
@@ -115,6 +109,7 @@ export const clientOptions: LanguageClientOptions = {
 					vdocUri(document),
 				);
 				counter++;
+				console.log(result);
 				if (result !== undefined || counter >= 5) {
 					clearInterval(id);
 				}
