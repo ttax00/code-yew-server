@@ -35,6 +35,7 @@ connection.onDocumentSymbol(() => []);
 connection.onDefinition(() => null);
 connection.onHover(() => null);
 connection.onTypeDefinition(() => null);
+connection.onPrepareRename(() => null);
 
 
 // Listen on the connection
