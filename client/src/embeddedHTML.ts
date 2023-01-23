@@ -96,7 +96,7 @@ export function getRegions(documentText: string) {
 }
 
 export function flattenDocumentSymbols(symbols: DocumentSymbol[]): DocumentSymbol[] {
-	return symbols.reduce((flat, symbol) => {
+	return symbols?.reduce((flat, symbol) => {
 		return flat.concat([symbol])
 			.concat(symbol.children ? flattenDocumentSymbols(symbol.children) : []);
 	}, []);
