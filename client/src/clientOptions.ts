@@ -13,9 +13,7 @@ function vdocUri(document: TextDocument) {
 		originalUri
 	)}.html`;
 	const vUri = Uri.parse(vdocUriString);
-
 	virtualDocumentContents.set(vUri.toString(true), getHTMLVirtualContent(document.getText()));
-
 	return vUri;
 }
 
@@ -101,20 +99,19 @@ export const clientOptions: LanguageClientOptions = {
 			}
 			// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 			// TEMP: try again every 1s, timeout at 5 times.
-			let result: undefined | DocumentSymbol[] = undefined;
+
 			let counter = 0;
 			const id = setInterval(async () => {
-				result = await commands.executeCommand<DocumentSymbol[]>(
+				const result = await commands.executeCommand<DocumentSymbol[]>(
 					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
 				);
 				counter++;
-				console.log(result);
 				if (result !== undefined || counter >= 5) {
 					clearInterval(id);
+					return flattenDocumentSymbols(result);
 				}
 			}, 1000);
-			return flattenDocumentSymbols(result);
 		}
 	}
 };
