@@ -12,15 +12,13 @@ export function isInsideHTMLRegion(documentText: string, offset: number) {
 	}
 
 	const regions = getRegions(documentText);
-	let answer = false;
-	regions.forEach((r) => {
-		if (r.languageId === 'html') {
-			if (r.start <= offset && offset <= r.end) {
-				answer = true;
-			}
-		}
-	});
-	return answer;
+	return regions.some((r) =>
+	(
+		r.languageId === 'html'
+		&& r.start <= offset
+		&& offset <= r.end
+	));
+
 }
 
 export function getHTMLVirtualContent(documentText: string) {
@@ -70,7 +68,6 @@ export function getRegions(documentText: string) {
 		};
 		let level = 0;
 		for (let i = start; i < documentText.length; i++) {
-			const char = documentText.charAt(i);
 			const change = action[documentText.charAt(i)];
 			if (change) {
 				if (level == 0) {

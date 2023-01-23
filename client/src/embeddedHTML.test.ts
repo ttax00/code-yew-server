@@ -11,7 +11,6 @@ describe('isValidHTMLMacro', () => {
 });
 
 describe('isInsideHTMLRegion', () => {
-
 	const test = `html! {<div>{"Hello World"}</div>}`;
 	expect(test.length).toBe(34);
 	expect(test.charAt(12)).toBe('{');
