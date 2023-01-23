@@ -6,6 +6,7 @@
 	"version": "0.1.0",
 	"pricing": "Free",
 	"icon": "rustyew.png",
+	"packageManager": "^npm@8.19.2",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/TechTheAwesome/code-yew-server/"
