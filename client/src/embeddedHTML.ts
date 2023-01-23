@@ -95,20 +95,11 @@ export function getRegions(documentText: string) {
 	return regions;
 }
 
-export function unpackDocumentSymbolChildren(symbol: DocumentSymbol): DocumentSymbol[] {
-	let result: DocumentSymbol[] = [];
-	result.push(symbol);
-	if (symbol.children.length > 0) {
-		symbol.children.forEach(s => result = result.concat(unpackDocumentSymbolChildren(s)));
-	}
-	return result;
-}
-
 export function flattenDocumentSymbols(symbols: DocumentSymbol[]) {
-
-	let flat: DocumentSymbol[] = [];
-	symbols.forEach(s => flat = flat.concat(unpackDocumentSymbolChildren(s)));
-	return flat;
+	return symbols.reduce((flat, symbol) => {
+		return flat.concat([symbol])
+			.concat(symbol.children ? flattenDocumentSymbols(symbol.children) : []);
+	}, []);
 }
 
 export function getSymbolShortName(symbol: string): string {

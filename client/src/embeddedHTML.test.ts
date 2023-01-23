@@ -1,4 +1,5 @@
-import { getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
+import { DocumentSymbol } from 'vscode';
+import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
 // TODO: ADD jest *test.ts files to typescript compiler ignore
 describe('isValidHTMLMacro', () => {
 	it('should be false without a html! macro', () => {
@@ -34,10 +35,38 @@ describe('isInsideHTMLRegion', () => {
 		expect(isInsideHTMLRegion(test, i)).toBe(false);
 	});
 });
+
 describe('getHTMLVirtualContent', () => {
 	it('should replace rust code with empty spaces', () => {
 		const res = getHTMLVirtualContent(`html! {\n<div>{"Hello World!"}</div>\n};`);
 		expect(res).toBe(`       \n<div>                </div>\n  `);
+	});
+});
+
+describe('flattenDocumentSymbols', () => {
+	const test = [
+		{
+			children: []
+		},
+		{
+			children: [{
+				children: []
+			}]
+		}
+	];
+
+	it('should flatten document symbols into an array', () => {
+		expect(flattenDocumentSymbols(test as unknown as DocumentSymbol[])).toStrictEqual([
+			{
+				children: []
+			}, {
+				children: [{
+					children: []
+				}]
+			}, {
+				children: []
+			}
+		]);
 	});
 });
 
@@ -53,3 +82,4 @@ describe('getSymbolShortName', () => {
 
 	});
 });
+
