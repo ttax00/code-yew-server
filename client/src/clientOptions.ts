@@ -100,18 +100,14 @@ export const clientOptions: LanguageClientOptions = {
 			// FIXME: [1] result is undefined for a long time, perhaps HTML Language Service isn't started yet?
 			// TEMP: try again every 1s, timeout at 5 times.
 
-			let counter = 0;
-			const id = setInterval(async () => {
-				const result = await commands.executeCommand<DocumentSymbol[]>(
+			let result = undefined;
+			for (let counter = 0; counter < 5 && !result; counter++) {
+				result = await commands.executeCommand<DocumentSymbol[]>(
 					'vscode.executeDocumentSymbolProvider',
 					vdocUri(document),
 				);
-				counter++;
-				if (result !== undefined || counter >= 5) {
-					clearInterval(id);
-					return flattenDocumentSymbols(result);
-				}
-			}, 1000);
+			}
+			return flattenDocumentSymbols(result);
 		}
 	}
 };
