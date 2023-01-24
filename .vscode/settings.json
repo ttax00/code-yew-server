@@ -2,11 +2,9 @@
 	"editor.insertSpaces": false,
 	"typescript.tsc.autoDetect": "off",
 	"typescript.preferences.quoteStyle": "single",
+	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": true
 	},
-	"cSpell.words": [
-		"rustyew",
-		"vsix"
-	]
+	"cSpell.words": ["rustyew",	"vsix"]
 }

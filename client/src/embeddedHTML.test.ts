@@ -29,7 +29,7 @@ describe('isInsideHTMLRegion', () => {
 	});
 
 	it.each([...arr(0, 6), 	// html! {
-	...arr(12, 26),		   	// {"Hello World"}
+		...arr(12, 26),		   	// {"Hello World"}
 		33					// }
 	])(`it should return false for pos: %p`, (i) => {
 		expect(isInsideHTMLRegion(test, i)).toBe(false);

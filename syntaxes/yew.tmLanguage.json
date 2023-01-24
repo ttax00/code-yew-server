@@ -11,10 +11,12 @@
 	],
 	"repository": {
 		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.yew",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
+			"patterns": [
+				{
+					"name": "keyword.control.yew",
+					"match": "\\b(if|while|for|return)\\b"
+				}
+			]
 		},
 		"strings": {
 			"name": "string.quoted.double.yew",

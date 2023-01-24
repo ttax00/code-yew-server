@@ -13,11 +13,11 @@ export function isInsideHTMLRegion(documentText: string, offset: number) {
 
 	const regions = getRegions(documentText);
 	return regions.some((r) =>
-	(
-		r.languageId === 'html'
+		(
+			r.languageId === 'html'
 		&& r.start <= offset
 		&& offset <= r.end
-	));
+		));
 
 }
 
