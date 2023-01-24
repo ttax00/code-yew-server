@@ -39,7 +39,7 @@ export function getHTMLVirtualContent(documentText: string) {
 
 	content = content.replace(/<>/g, '  ');
 	content = content.replace(/<\/>/g, '   ');
-	content = content.replace(/<.*\/>/g, "");
+	content = content.replace(/<.*\/>/g, '');
 	content = content.replace(/~/g, ' ');
 	content = content.replace(/@/g, 'g');
 	content = content.replace(/= /g, '  ');

@@ -72,13 +72,13 @@ describe('flattenDocumentSymbols', () => {
 
 describe('getSymbolShortName', () => {
 	it('should return the name before "." seperator', () => {
-		expect(getSymbolShortName("hello.world")).toBe("hello");
-		expect(getSymbolShortName("my-hame-is.world.beta.2")).toBe("my-hame-is");
+		expect(getSymbolShortName('hello.world')).toBe('hello');
+		expect(getSymbolShortName('my-hame-is.world.beta.2')).toBe('my-hame-is');
 	});
 
 	it('should return empty string when errors', () => {
-		expect(getSymbolShortName(".")).toBe("");
-		expect(getSymbolShortName("")).toBe("");
+		expect(getSymbolShortName('.')).toBe('');
+		expect(getSymbolShortName('')).toBe('');
 
 	});
 });

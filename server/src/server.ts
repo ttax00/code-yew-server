@@ -19,7 +19,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 documents.listen(connection);
 
 connection.onInitialize((_params: InitializeParams) => {
-	console.log("server initialized");
+	console.log('server initialized');
 	return {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Full,

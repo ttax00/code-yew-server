@@ -49,7 +49,7 @@ export function activate(context: ExtensionContext) {
 		clientOptions
 	);
 
-	console.log("server & client started");
+	console.log('server & client started');
 	// Start the client. This will also launch the server
 	client.start();
 }
