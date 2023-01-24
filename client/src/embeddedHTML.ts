@@ -1,38 +1,24 @@
 import { DocumentSymbol, SymbolInformation } from 'vscode';
 
 
-interface EmbeddedRegion {
-	languageId: string | undefined;
-	start: number;
-	end: number;
-	attributeValue?: boolean;
-}
 
-export function isValidRustYew(documentText: string) {
-	if (documentText.match(/html! {.*}/gs)) {
-		// valid if there is at least one html! { ... } macro
-		return true;
-	} else {
-		return false;
-	}
+export function isValidHTMLMacro(documentText: string) {
+	return !!documentText.match(/html! {.*}/gs);
 }
 
 export function isInsideHTMLRegion(documentText: string, offset: number) {
-	// Don't parse on no html! macro documents
-	if (!isValidRustYew(documentText)) {
+	if (!isValidHTMLMacro(documentText)) {
 		return false;
 	}
 
 	const regions = getRegions(documentText);
-	let answer = false;
-	regions.forEach((r) => {
-		if (r.languageId === 'html') {
-			if (r.start <= offset && offset <= r.end) {
-				answer = true;
-			}
-		}
-	});
-	return answer;
+	return regions.some((r) =>
+	(
+		r.languageId === 'html'
+		&& r.start <= offset
+		&& offset <= r.end
+	));
+
 }
 
 export function getHTMLVirtualContent(documentText: string) {
@@ -47,7 +33,7 @@ export function getHTMLVirtualContent(documentText: string) {
 
 	regions.forEach(r => {
 		if (r.languageId === 'html') {
-			content = content.slice(0, r.start) + documentText.slice(r.start, r.end) + content.slice(r.end);
+			content = content.slice(0, r.start) + documentText.slice(r.start, r.end + 1) + content.slice(r.end + 1);
 		}
 	});
 
@@ -62,80 +48,61 @@ export function getHTMLVirtualContent(documentText: string) {
 	return content;
 }
 
+interface EmbeddedRegion {
+	languageId: 'html' | 'rust';
+	start: number;
+	end: number;
+}
+
 export function getRegions(documentText: string) {
-	// parsing valid html out!
+	// parsing valid `html! {` indexes. 
 	const regions: EmbeddedRegion[] = [];
-	let match;
-	const reHTML = /html! {/g;
-	const macroStartIndexes = [];
-	while ((match = reHTML.exec(documentText)) != null) {
-		macroStartIndexes.push(match.index + 7);
-	}
+	const regex = /html! {/g;
 
-	macroStartIndexes.forEach((index) => {
-		let start = index;
-		let layer = 0;
-		for (let i = index; i < documentText.length; i++) {
-			let changed = false;
-			switch (documentText.charAt(i)) {
-				case '{':
-					layer++;
-					changed = true;
-					break;
-				case '}':
-					layer--;
-					changed = true;
-					break;
-			}
-
-			if (changed) {
-				changed = false;
-				if (layer - 1 == 0) {
-					regions.push({
-						languageId: 'html',
-						start: start,
-						end: i,
-					});
-				} else if (layer < 0) {
-					regions.push({
-						languageId: 'html',
-						start: start,
-						end: i,
-					});
-					break;
-				} else {
+	for (const match of documentText.matchAll(regex)) {
+		// Start index of the char after `{`
+		let start = match.index + 7;
+		const action = {
+			'{': 1,
+			'}': - 1,
+		};
+		let level = 0;
+		for (let i = start; i < documentText.length; i++) {
+			const change = action[documentText.charAt(i)];
+			if (change) {
+				if (level == 0) {
+					if (change == 1) {
+						regions.push({
+							languageId: 'html',
+							start: start,
+							end: i - 1,
+						});
+					} else if (change == -1) {
+						regions.push({
+							languageId: 'html',
+							start: start,
+							end: i - 1,
+						});
+						break;
+					}
+				} else if (level == 1 && change == -1) {
 					start = i + 1;
 				}
+				level += change;
 			}
-
 		}
-	});
-
+	}
 	return regions;
 }
 
-export function unpackDocumentSymbolChildren(symbol: DocumentSymbol): DocumentSymbol[] {
-	let result: DocumentSymbol[] = [];
-	result.push(symbol);
-	if (symbol.children.length > 0) {
-		symbol.children.forEach(s => result = result.concat(unpackDocumentSymbolChildren(s)));
-	}
-	return result;
-}
-
-export function flattenDocumentSymbols(symbols: DocumentSymbol[]) {
-
-	let flat: DocumentSymbol[] = [];
-	symbols.forEach(s => flat = flat.concat(unpackDocumentSymbolChildren(s)));
-	return flat;
+export function flattenDocumentSymbols(symbols: DocumentSymbol[]): DocumentSymbol[] {
+	return symbols?.reduce((flat, symbol) => {
+		return flat.concat([symbol])
+			.concat(symbol.children ? flattenDocumentSymbols(symbol.children) : []);
+	}, []);
 }
 
 export function getSymbolShortName(symbol: string): string {
-	const match = symbol.match(/\w*[^.]/);
-	if (match.length === 1) {
-		return match[0];
-	} else {
-		throw Error(`symbol name might be wrong ${symbol}`);
-		return '';
-	}
+	const match = symbol.match(/^.*?(?=\.)/);
+	return match ? match[0] : '';
 }

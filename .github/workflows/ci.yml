@@ -16,6 +16,15 @@ jobs:
         run: npm i
       - name: run lint
         run: npm run lint
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: install dependencies
+        run: npm i
+      - name: run test
+        run: npm run test
 
   build: 
     runs-on: ubuntu-latest
