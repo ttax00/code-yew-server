@@ -33,8 +33,7 @@
 			{
 				"id": "rust",
 				"aliases": [
-					"Rust Yew",
-					"Rust"
+					"Rust Yew"
 				],
 				"extensions": [
 					".rs"

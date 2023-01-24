@@ -25,7 +25,11 @@
 		},
 		{
 			"open": "<>",
-			"close": "</>"
+			"close": "</>",
+			"notIn": [
+				"string",
+				"comment"
+			]
 		}
 	],
 	"indentationRules": {
