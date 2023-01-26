@@ -1,4 +1,4 @@
-import { commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind } from 'vscode';
+import { commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind, FoldingRange, FoldingRangeKind } from 'vscode';
 
 import {
 	LanguageClientOptions
@@ -108,7 +108,22 @@ export const clientOptions: LanguageClientOptions = {
 			// TEMP: try again every 1s, timeout at 5 times.
 
 			return await getFlattenSymbols(document);
-		}
+		},
+		async provideFoldingRanges(document, context, token, next) {
+			if (!isValidHTMLMacro(document.getText())) {
+				return next(document, context, token);
+			}
+			const symbols = await getFlattenSymbols(document);
+			const ranges = symbols.map(({ range }) => {
+				const { start, end } = range;
+				if (start.line === end.line)
+					return null;
+				else
+					return new FoldingRange(range.start.line, range.end.line, FoldingRangeKind.Region);
+			}).filter((r) => !!r);
+
+			return ranges;
+		},
 	}
 };
 

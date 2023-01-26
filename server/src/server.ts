@@ -31,7 +31,7 @@ connection.onInitialize((_params: InitializeParams) => {
 			renameProvider: {
 				prepareProvider: true
 			},
-
+			foldingRangeProvider: true,
 		}
 	};
 });
@@ -43,6 +43,7 @@ connection.onDefinition(() => null);
 connection.onHover(() => null);
 connection.onTypeDefinition(() => null);
 connection.onPrepareRename(() => null);
+connection.onFoldingRanges(() => null);
 
 // Listen on the connection
 connection.listen();
