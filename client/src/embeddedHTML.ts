@@ -1,5 +1,4 @@
-import { DocumentSymbol, SymbolInformation } from 'vscode';
-
+import { DocumentSymbol, Position, Range, TextDocument } from 'vscode';
 
 
 export function isValidHTMLMacro(documentText: string) {

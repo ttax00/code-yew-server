@@ -15,9 +15,7 @@
 		{
 			"open": "\"",
 			"close": "\"",
-			"notIn": [
-				"string"
-			]
+			"notIn": ["string"]
 		},
 		{
 			"open": "/*",
