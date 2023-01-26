@@ -1,7 +1,6 @@
 import { DocumentSymbol, Position, Range, SymbolInformation, TextDocument } from 'vscode';
 
 
-
 export function isValidHTMLMacro(documentText: string) {
 	return !!documentText.match(/html! {.*}/gs);
 }
@@ -13,11 +12,11 @@ export function isInsideHTMLRegion(documentText: string, offset: number) {
 
 	const regions = getRegions(documentText);
 	return regions.some((r) =>
-	(
-		r.languageId === 'html'
+		(
+			r.languageId === 'html'
 		&& r.start <= offset
 		&& offset <= r.end
-	));
+		));
 
 }
 
