@@ -3,7 +3,7 @@ import { commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, Wor
 import {
 	LanguageClientOptions
 } from 'vscode-languageclient/node';
-import { flattenDocumentSymbols, getFunctionComponentRange, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
+import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
 import { virtualDocumentContents } from './extension';
 
 
@@ -121,4 +121,24 @@ async function getFlattenSymbols(document: TextDocument): Promise<DocumentSymbol
 		);
 	}
 	return flattenDocumentSymbols(result);
+}
+
+export function getFunctionComponentRange(document: TextDocument, position: Position): { range: Range, placeholder: string; } {
+	const line = document.lineAt(position.line);
+	const re = /<\s*(\w+)\s*\/>/g; // matches `< FunctionalComponent />` declaration 
+	for (const match of line.text.matchAll(re)) {
+		const start = match.index + match[0].indexOf(match[1]);
+		const end = start + match[1].length;
+		const range = new Range(position.line, start, position.line, end);
+		if (range.contains(position)) {
+			return {
+				range: new Range(position.line, start, position.line, end),
+				placeholder: match[1],
+			};
+		}
+	}
+	return {
+		range: new Range(position, position),
+		placeholder: '',
+	};
 }
