@@ -1,8 +1,6 @@
-import { commands, Uri, CompletionList, TextDocument, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind, FoldingRange, FoldingRangeKind } from 'vscode';
+import { commands, Uri, CompletionList, TextDocument, Location, DocumentSymbol, Hover, WorkspaceEdit, Range, Position, TextEdit, CompletionItemKind, FoldingRange, FoldingRangeKind, workspace, MarkdownString, LocationLink } from 'vscode';
 
-import {
-	LanguageClientOptions
-} from 'vscode-languageclient/node';
+import { LanguageClientOptions } from 'vscode-languageclient/node';
 import { flattenDocumentSymbols, getHTMLVirtualContent, getSymbolShortName, isInsideHTMLRegion, isValidHTMLMacro } from './embeddedHTML';
 import { virtualDocumentContents } from './extension';
 
@@ -98,6 +96,17 @@ export const clientOptions: LanguageClientOptions = {
 				vdocUri(document),
 				position,
 			);
+			if (!result.length) { // No result from HTML
+				const { placeholder } = getFunctionComponentRange(document, position);
+				if (placeholder) { // Check if is a function component
+					const result = await commands.executeCommand<Hover[]>(
+						'vscode.executeHoverProvider',
+						document.uri,
+						document.positionAt(document.getText().indexOf(placeholder))
+					);
+					return result[0];
+				}
+			}
 			return result[0];
 		},
 		async provideDocumentSymbols(document, token, next) {
