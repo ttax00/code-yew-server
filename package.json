@@ -14,18 +14,19 @@
 	"keywords": [
 		"rust",
 		"yew",
-		"highlighting",
-		"language"
+		"html",
+		"macro",
+		"syntax"
 	],
 	"engines": {
 		"vscode": "^1.72.0"
 	},
 	"categories": [
+		"Programming Languages",
 		"Other"
 	],
 	"activationEvents": [
-		"onLanguage:rustyew",
-		"onLanguage:rust"
+		"onLanguage:rustyew"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
@@ -82,5 +83,8 @@
 		"ts-jest": "^29.0.5",
 		"ts-node": "^10.9.1",
 		"typescript": "^4.8.4"
-	}
+	},
+	"extensionDependencies": [
+		"rust-lang.rust-analyzer"
+	]
 }
