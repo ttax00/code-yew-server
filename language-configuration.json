@@ -15,19 +15,13 @@
 		{
 			"open": "\"",
 			"close": "\"",
-			"notIn": ["string"]
+			"notIn": [
+				"string"
+			]
 		},
 		{
 			"open": "/*",
 			"close": " */"
-		},
-		{
-			"open": "<>",
-			"close": "</>",
-			"notIn": [
-				"string",
-				"comment"
-			]
 		}
 	],
 	"indentationRules": {
