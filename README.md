@@ -11,6 +11,8 @@
 
 A VSCode extension that provides some language features for [Yew](https://yew.rs/)'s html macro syntax.
 
+![](.github/assets/main.gif)
+
 ## Features
 - Syntax highlighting.
 - HTML tags hover. 
@@ -18,9 +20,20 @@ A VSCode extension that provides some language features for [Yew](https://yew.rs
 - Document symbols.
 - Symbols rename. 
 - Folding ranges.
-## Unplanned / require help
+
+## Installation
+Get the extension on [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=TechTheAwesome.rust-yew&ssr=false) !
+
+## Contributing
+For those who are interested in getting involved:
+ - Report bugs and request features by opening an issue on this repository.
+ - Contribute code or documentation by forking the repository and submitting a pull request.
+
+### Unplanned / required help
+Here's some long standing issues/feature that I would require assistance on if they were to be implemented.
 - [ ] Formatting support.
-- [ ] Language configuration crossing between rust & macro syntax.
+- [ ] Language configuration crossing between rust & macro syntax. [Issue](https://github.com/TechTheAwesome/code-yew-server/issues/19)
+
 ## Acknowledgements
 - Inspiration taken from [yew-highlighting](https://github.com/Alexandre-Borghi/yew-highlighting). 
 - Follows the amazingly detailed guide for [embedded languages](https://code.visualstudio.com/api/language-extensions/embedded-languages).
