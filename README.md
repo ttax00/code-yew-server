@@ -26,8 +26,8 @@ Get the extension on [VSCode Marketplace](https://marketplace.visualstudio.com/i
 
 ## Contributing
 For those who are interested in getting involved:
- - Report bugs and request features by opening an issue on this repository.
- - Contribute code or documentation by forking the repository and submitting a pull request.
+ - Report bugs and request features by opening an issue [here](https://github.com/TechTheAwesome/code-yew-server/issues).
+ - Contribute code or documentation by forking the repository and submitting a pull request [here](https://github.com/TechTheAwesome/code-yew-server/pulls).
 
 ### Unplanned / required help
 Here's some long standing issues/feature that I would require assistance on if they were to be implemented.
