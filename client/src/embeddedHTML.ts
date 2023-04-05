@@ -102,6 +102,6 @@ export function flattenDocumentSymbols(symbols: DocumentSymbol[]): DocumentSymbo
 }
 
 export function getSymbolShortName(symbol: string): string {
-	const match = symbol.match(/^.*?(?=\.)/);
+	const match = `${symbol}.`.match(/^.*?(?=\.)/);
 	return match ? match[0] : '';
 }

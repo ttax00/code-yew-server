@@ -76,10 +76,14 @@ describe('getSymbolShortName', () => {
 		expect(getSymbolShortName('my-hame-is.world.beta.2')).toBe('my-hame-is');
 	});
 
+	it('should return the name when theres no seperator', () => {
+		expect(getSymbolShortName('hello')).toBe('hello');
+		expect(getSymbolShortName('ALongName')).toBe('ALongName');
+	});
+
 	it('should return empty string when errors', () => {
 		expect(getSymbolShortName('.')).toBe('');
 		expect(getSymbolShortName('')).toBe('');
-
 	});
 });
 
