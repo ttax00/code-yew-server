@@ -31,7 +31,7 @@
 			]
 		},
 		"rust-brackets": {
-			"name": "source.rust.yew",
+			"name": "source.rust.yew.html.embedded-rust",
 			"begin": "{",
 			"end": "}",
 			"patterns": [
