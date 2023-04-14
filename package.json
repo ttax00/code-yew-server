@@ -40,6 +40,9 @@
 					".rs"
 				],
 				"configuration": "./language-configuration.json"
+			},{
+				"id": "html",
+				"configuration": "./html.language-configuration.json"
 			}
 		],
 		"grammars": [
@@ -51,11 +54,7 @@
 				"path": "./syntaxes/yew.injection.json",
 				"embeddedLanguages": {
 					"source.rust.yew.html": "html",
-					"source.rust.yew": "rust"
-				},
-				"tokenTypes": {
-					"source.rust.yew.html": "other",
-					"source.rust.yew": "other"
+					"source.rust.yew.html.embedded-rust": "rust"
 				}
 			}
 		]
