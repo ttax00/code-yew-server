@@ -40,6 +40,9 @@
 					".rs"
 				],
 				"configuration": "./language-configuration.json"
+			},{
+				"id": "html",
+				"configuration": "./html.language-configuration.json"
 			}
 		],
 		"grammars": [
