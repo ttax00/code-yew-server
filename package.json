@@ -3,7 +3,7 @@
 	"description": "Provides some html language features for yew html macro.",
 	"author": "TechTheAwesome",
 	"publisher": "TechTheAwesome",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"pricing": "Free",
 	"icon": "rustyew.png",
 	"packageManager": "^npm@8.19.2",
@@ -40,7 +40,8 @@
 					".rs"
 				],
 				"configuration": "./language-configuration.json"
-			},{
+			},
+			{
 				"id": "html",
 				"configuration": "./html.language-configuration.json"
 			}
