@@ -1,5 +1,5 @@
 {
-	"scopeName": "source.rust.yew",
+	"scopeName": "source.rust.leptos",
 	"injectionSelector": "L:source.rust",
 	"patterns": [
 		{
@@ -11,8 +11,8 @@
 	],
 	"repository": {
 		"html-macro": {
-			"name": "source.rust.yew.html",
-			"begin": "html! {",
+			"name": "source.rust.leptos.html",
+			"begin": "view! {",
 			"end": "}",
 			"beginCaptures": {
 				"0": {
@@ -34,7 +34,7 @@
 			]
 		},
 		"rust-brackets": {
-			"name": "source.rust.yew.html.embedded-rust",
+			"name": "source.rust.leptos.html.embedded-rust",
 			"begin": "{",
 			"end": "}",
 			"patterns": [

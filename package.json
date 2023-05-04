@@ -40,7 +40,8 @@
 					".rs"
 				],
 				"configuration": "./language-configuration.json"
-			},{
+			},
+			{
 				"id": "html",
 				"configuration": "./html.language-configuration.json"
 			}
@@ -55,6 +56,17 @@
 				"embeddedLanguages": {
 					"source.rust.yew.html": "html",
 					"source.rust.yew.html.embedded-rust": "rust"
+				}
+			},
+			{
+				"injectTo": [
+					"source.rust"
+				],
+				"scopeName": "source.rust.leptos",
+				"path": "./syntaxes/leptos.injection.json",
+				"embeddedLanguages": {
+					"source.rust.leptos.html": "html",
+					"source.rust.leptos.embedded-rust": "rust"
 				}
 			}
 		]
