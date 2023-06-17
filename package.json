@@ -42,7 +42,7 @@
 				"configuration": "./language-configuration.json"
 			},
 			{
-				"id": "html",
+				"id": "escapedhtml",
 				"configuration": "./html.language-configuration.json"
 			}
 		],
@@ -54,7 +54,7 @@
 				"scopeName": "source.rust.yew",
 				"path": "./syntaxes/yew.injection.json",
 				"embeddedLanguages": {
-					"source.rust.yew.html": "html",
+					"source.rust.yew.html": "escapedhtml",
 					"source.rust.yew.html.embedded-rust": "rust"
 				}
 			}
